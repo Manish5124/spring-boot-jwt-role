@@ -1,12 +1,16 @@
 package com.manish.springrolejwt.controller;
 
 import com.manish.springrolejwt.config.TokenProvider;
-import com.manish.springrolejwt.model.AuthToken;
-import com.manish.springrolejwt.model.LoginUser;
-import com.manish.springrolejwt.model.User;
-import com.manish.springrolejwt.model.UserDto;
+import com.manish.springrolejwt.model.*;
 import com.manish.springrolejwt.service.UserService;
+import com.manish.springrolejwt.service.impl.UserServiceImpl;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,11 +18,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.LoginException;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
+@Api(value = "Login and Validation endpoints for Authorization Service")
 @RestController
-@RequestMapping("/users")
+@Slf4j
+//@RequestMapping("/users")
 public class UserController {
 
     @Autowired
@@ -28,25 +37,59 @@ public class UserController {
     private TokenProvider jwtTokenUtil;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
-    @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+    private VaildatingDTO vaildatingDTO = new VaildatingDTO();
+
+    @PostMapping("/authenticate")
     public ResponseEntity<?> generateToken(@RequestBody LoginUser loginUser) throws AuthenticationException {
+
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginUser.getUsername(),
                         loginUser.getPassword()
+
                 )
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         final String token = jwtTokenUtil.generateToken(authentication);
+        vaildatingDTO.setValidStatus(true);
         return ResponseEntity.ok(new AuthToken(token));
     }
 
-    @RequestMapping(value="/register", method = RequestMethod.POST)
-    public User saveUser(@RequestBody UserDto user){
-        return userService.save(user);
+//    @RequestMapping(value="/registration", method = RequestMethod.POST)
+//    public String saveUser(@RequestBody UserDto user){
+//         userService.save(user);
+//        return "redirect:/registration?success";
+//    }
+
+
+    @GetMapping(path = "/validate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "tokenValidation", notes = "returns boolean after validating JWT", httpMethod = "GET", response = ResponseEntity.class)
+    public ResponseEntity<VaildatingDTO> validatingAuthorizationToken(
+            @ApiParam(name = "Authorization", value = "JWT generated for current customer present") @RequestHeader(name = "Authorization") String tokenDup) {
+
+        log.info("BEGIN - [validatingAuthorizationToken(JWT-token)]");
+        String token = tokenDup.substring(7);
+        try {
+            UserDetails user = userService.loadUserByUsername(jwtTokenUtil.getUsernameFromToken(token));
+            if (Boolean.TRUE.equals(jwtTokenUtil.validateToken(token, user))) {
+                log.debug("Token matched is Valid");
+                log.info("Token matched is Valid");
+                log.info("END - validate()");
+                vaildatingDTO.setValidStatus(true);
+                return new ResponseEntity<>(vaildatingDTO, HttpStatus.OK);
+            } else {
+                throw new LoginException("Invalid Token");
+            }
+        } catch (Exception e) {
+            log.debug("Invalid token - Bad Credentials Exception");
+            log.info("END Exception - validatingAuthorizationToken()");
+            vaildatingDTO.setValidStatus(false);
+            return new ResponseEntity<>(vaildatingDTO, HttpStatus.BAD_REQUEST);
+        }
+
     }
 
 

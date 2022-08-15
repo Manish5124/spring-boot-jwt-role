@@ -22,21 +22,24 @@ public class User {
     private String email;
 
     @Column
-    private String phone;
+    private String role;
 
-    @Column
-    private String name;
 
-    @Column
-    private String businessTitle;
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "USER_ROLES",
             joinColumns = {
-            @JoinColumn(name = "USER_ID")
+                    @JoinColumn(name = "USER_ID")
             },
             inverseJoinColumns = {
-            @JoinColumn(name = "ROLE_ID") })
+                    @JoinColumn(name = "ROLE_ID") })
     private Set<Role> roles;
 
     public long getId() {
@@ -71,29 +74,6 @@ public class User {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getBusinessTitle() {
-        return businessTitle;
-    }
-
-    public void setBusinessTitle(String businessTitle) {
-        this.businessTitle = businessTitle;
-    }
 
     public Set<Role> getRoles() {
         return roles;

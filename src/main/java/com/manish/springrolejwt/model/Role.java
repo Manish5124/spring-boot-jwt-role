@@ -12,9 +12,6 @@ public class Role {
     @Column
     private String name;
 
-    @Column
-    private String description;
-
     public long getId() {
         return id;
     }
@@ -31,11 +28,4 @@ public class Role {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

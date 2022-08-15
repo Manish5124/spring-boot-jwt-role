@@ -1,14 +1,19 @@
 package com.manish.springrolejwt.model;
 
 public class UserDto {
-    
+
     private String username;
     private String password;
     private String email;
-    private String phone;
-    private String name;
-    private String businessTitle;
+    private String role;
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getUsername() {
         return username;
@@ -34,40 +39,18 @@ public class UserDto {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
-    public String getBusinessTitle() {
-        return businessTitle;
-    }
-
-    public void setBusinessTitle(String businessTitle) {
-        this.businessTitle = businessTitle;
-    }
 
     public User getUserFromDto(){
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
         user.setEmail(email);
-        user.setPhone(phone);
-        user.setName(name);
-        user.setBusinessTitle(businessTitle);
-        
+        user.setRole(role);
         return user;
     }
-    
+
 }
