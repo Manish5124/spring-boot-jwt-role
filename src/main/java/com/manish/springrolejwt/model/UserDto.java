@@ -49,7 +49,7 @@ public class UserDto {
         user.setUsername(username);
         user.setPassword(password);
         user.setEmail(email);
-        user.setRole(role);
+        user.setRole("USER");
         return user;
     }
 
